@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
-import { PiCheckCircleLight, PiCoatHangerLight, PiDoorOpenLight, PiFileTextLight, PiGridFourLight, PiImagesLight, PiMagnifyingGlassLight, PiUserCircleLight } from "react-icons/pi";
+import { PiCoatHangerLight, PiDoorOpenLight, PiGridFourLight, PiUserCircleLight } from "react-icons/pi";
 
 const services = [
   ["المطابخ", "مناطق واضحة للتحضير والمخزون.", "/images/kitchen-before.jpg", "/images/kitchen-organized.jpg"],
@@ -50,13 +50,16 @@ const faqs = [
   ["هل يمكن تدريب العاملة المنزلية؟", "نعم، نشرح لها طريقة النظام وإعادة الأغراض إلى أماكنها ليبقى سهلًا بعد التسليم."],
 ];
 
-function BeforeAfter({before, after, label}:{before:string;after:string;label:string}) {
+function BeforeAfter({before, after, label, priority=false}:{before:string;after:string;label:string;priority?:boolean}) {
   const [split, setSplit] = useState(52);
-  return <div className="compare" style={{"--split": `${split}%`} as React.CSSProperties}>
-    <img className="after" src={after} alt={`${label} بعد التنظيم`} />
-    <div className="before"><img src={before} alt={`${label} قبل التنظيم`} /></div>
+  const move=(element:HTMLDivElement,clientX:number)=>{const rect=element.getBoundingClientRect();setSplit(Math.max(10,Math.min(90,((clientX-rect.left)/rect.width)*100)))};
+  return <div className="compare" style={{"--split": `${split}%`} as React.CSSProperties}
+    onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);move(e.currentTarget,e.clientX)}}
+    onPointerMove={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))move(e.currentTarget,e.clientX)}}>
+    <img className="after" src={after} alt={`${label} بعد التنظيم`} loading={priority?"eager":"lazy"} fetchPriority={priority?"high":"auto"} />
+    <div className="before"><img src={before} alt={`${label} قبل التنظيم`} loading={priority?"eager":"lazy"} fetchPriority={priority?"high":"auto"} /></div>
     <span className="tag before-tag">قبل</span><span className="tag after-tag">بعد</span>
-    <input aria-label="حرّكي للمقارنة بين قبل وبعد" type="range" min="10" max="90" value={split} onChange={e=>setSplit(+e.target.value)} />
+    <input aria-label="حرّكي للمقارنة بين قبل وبعد" type="range" min="10" max="90" value={split} onInput={e=>setSplit(+(e.currentTarget.value))} onChange={e=>setSplit(+e.currentTarget.value)} />
   </div>;
 }
 
@@ -94,14 +97,13 @@ export default function TarteeebSite(){
   const [menu,setMenu]=useState(false);
   return <main>
     <header><a className="official-logo" href="#top" aria-label="ترتيب Arrange and Organize"><img src="/tarteeb-logo-official.png" alt="شعار ترتيب الرسمي"/></a><button className="menu" aria-label="فتح القائمة" onClick={()=>setMenu(!menu)}>☰</button><nav className={menu?"open":""}>{[["قبل وبعد","top"],["خدماتنا","services"],["منهج ترتيب","method"],["من نحن","about"],["الأسئلة الشائعة","faq"]].map(([l,id])=><a key={id} href={`#${id}`} onClick={()=>setMenu(false)}>{l}</a>)}</nav></header>
-    <section id="top" className="comparison-hero"><div className="comparison-intro"><h1>اسحبي لرؤية الفرق.</h1><p>من الفوضى إلى نظام واضح يناسب يومك.</p></div><BeforeAfter label="المطبخ" before="/images/kitchen-before.jpg" after="/images/kitchen-organized.jpg"/></section>
-    <section className="trust">{["فريق محترف ومدرّب","إشراف على المشروع","حلول حسب روتينك","خصوصية والتزام"].map(x=><span key={x}>✓ {x}</span>)}</section>
+    <section id="top" className="comparison-hero"><BeforeAfter priority label="المطبخ" before="/images/kitchen-before.jpg" after="/images/kitchen-organized.jpg"/></section>
+    <section className="brand-intro"><p>ترتيب تحوّل مساحاتك المزدحمة إلى أنظمة عملية وجميلة، مصممة لتناسب حياتك وتستمر معك.</p></section>
     <section className="proof-counts" aria-label="أرقام ترتيب">{stats.map(({Icon,value,label})=><div key={label}><Icon aria-hidden="true"/><strong><CountUp value={value}/></strong><span>{label}</span></div>)}</section>
     <section id="services" className="section services-section"><div className="section-head"><div><p className="eyebrow">خدماتنا</p><h2>نرتب المساحة حول حياتك.</h2></div><p>مرّري المؤشر أو اضغطي على الصورة لرؤية النتيجة.</p></div><div className="service-grid">{services.map(([n,d,before,after])=><ServiceCard key={n} name={n} description={d} before={before} after={after}/>)}</div></section>
     <section id="method" className="method section"><div className="section-head"><div><p className="eyebrow">منهج ترتيب</p><h2>ست خطوات. نظام واحد يستمر.</h2></div><p>اختاري أي مرحلة لاستكشافها.</p></div><MethodExperience/></section>
     <section id="work" className="section transformations"><div className="section-head"><div><p className="eyebrow">تحولات أخرى</p><h2>قبل وبعد.</h2></div><p>اسحبي الخط داخل الصورة.</p></div><div className="transform-grid two"><article><h3>غرفة الملابس</h3><BeforeAfter label="غرفة الملابس" before="/images/closet-before.jpg" after="/images/closet-organized.jpg"/></article><article><h3>المخزن</h3><BeforeAfter label="المخزن" before="/images/storage-before.jpg" after="/images/storage-organized.jpg"/></article></div></section>
-    <section className="section journey journey-graphic"><div className="journey-title"><p className="eyebrow">رحلة ترتيب</p><h2>من رسالة إلى مساحة جاهزة.</h2><p>أربع محطات واضحة، ونحن معك في كل خطوة.</p></div><div className="journey-canvas">{[[PiImagesLight,"أرسلي الصور","صور أو فيديو للمساحة"],[PiMagnifyingGlassLight,"نراجع المساحة","نحدد الاحتياج والنطاق"],[PiFileTextLight,"يصلك العرض","سعر واضح وموعد مناسب"],[PiCheckCircleLight,"ننفذ ونسلّم","نظام جاهز للاستخدام"]].map(([Icon,title,text],i)=><article key={title as string}><div className="journey-icon"><Icon aria-hidden="true"/></div><span className="journey-number">0{i+1}</span><h3>{title as string}</h3><p>{text as string}</p></article>)}</div><a className="journey-action" href="https://wa.me/?text=مرحبًا،%20أرغب%20في%20تقييم%20مساحتي" target="_blank">ابدئي بإرسال الصور</a></section>
-    <section id="about" className="section about" onPointerMove={e=>{const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.setProperty("--mx",`${((e.clientX-r.left)/r.width)*100}%`);e.currentTarget.style.setProperty("--my",`${((e.clientY-r.top)/r.height)*100}%`)}}><div><p className="eyebrow">عن ترتيب</p><h2>نرتب باحترام وخصوصية.</h2></div><div><p>فريق سعودي مدرّب يعمل بإشراف واضح، دون أحكام أو تصوير بلا موافقة.</p><div className="commitment"><strong>متابعة بعد التسليم</strong><span>نعود إليك بعد أسبوعين للتأكد من سهولة النظام.</span></div></div></section>
+    <section id="about" className="section about"><div><p className="eyebrow">عن ترتيب</p><h2>نرتب باحترام وخصوصية.</h2></div><div><p>فريق سعودي مدرّب يعمل بإشراف واضح، دون أحكام أو تصوير بلا موافقة.</p><div className="commitment"><strong>متابعة بعد التسليم</strong><span>نعود إليك بعد أسبوعين للتأكد من سهولة النظام.</span></div></div></section>
     <section id="faq" className="section faq"><p className="eyebrow">قبل أن تبدئي</p><h2>أسئلة شائعة</h2><div>{faqs.map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><div className="faq-answer"><p>{a}</p></div></details>)}</div></section>
     <section id="assessment" className="section assess-wrap"><div className="assessment-copy"><p className="eyebrow">طلب تقييم المساحة</p><h2>ابدئي بخطوات بسيطة</h2><p>أخبرينا عن المساحة وهدفك، ثم راجعي الملخص وافتحي رسالة واتساب الجاهزة.</p></div><Assessment /></section>
     <section className="final-cta"><p className="eyebrow">خطوتك الأولى</p><h2>جاهزة لمساحة أسهل وأكثر راحة؟</h2><p>أرسلي صورًا أو فيديو للمساحة، وسيقوم فريق ترتيب بمراجعتها واقتراح نطاق العمل المناسب.</p><a href="https://wa.me/?text=مرحبًا،%20أرغب%20في%20تقييم%20مساحتي" target="_blank">أرسلي الصور عبر واتساب</a></section>
