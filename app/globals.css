@@ -560,3 +560,10 @@ header nav{margin:0 auto;justify-content:center}
 .service-state.before-state{background:rgba(249,177,167,.92);color:var(--ink);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .service-state.after-state{background:rgba(97,213,209,.9);color:var(--ink);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 @media(max-width:767px){.proof-counts{padding:14px}.proof-counts div{background:rgba(255,255,255,.18)}}
+
+/* Aurora gradient for Tarteeb proof numbers */
+.proof-counts{background:#c9eeeb}
+.proof-counts:before{inset:-35%;width:auto;height:auto;left:-35%;top:-35%;border-radius:42%;opacity:.95;filter:blur(34px) saturate(130%);background:radial-gradient(circle at 22% 30%,rgba(64,210,204,.95) 0 16%,transparent 42%),radial-gradient(circle at 78% 28%,rgba(247,165,154,.92) 0 18%,transparent 44%),radial-gradient(circle at 68% 80%,rgba(198,185,239,.72) 0 17%,transparent 42%),radial-gradient(circle at 24% 78%,rgba(255,255,255,.82) 0 14%,transparent 38%);animation:tarteebAurora 13s ease-in-out infinite alternate}
+.proof-counts:after{inset:-25%;width:auto;height:auto;left:-25%;bottom:-25%;border-radius:45%;opacity:.58;filter:blur(42px);background:conic-gradient(from 90deg at 50% 50%,rgba(249,177,167,.72),rgba(97,213,209,.78),rgba(196,183,238,.66),rgba(249,177,167,.72));animation:tarteebAurora 17s ease-in-out -6s infinite alternate-reverse}
+@keyframes tarteebAurora{0%{transform:translate3d(-5%,-3%,0) rotate(-5deg) scale(1)}50%{transform:translate3d(6%,5%,0) rotate(5deg) scale(1.08)}100%{transform:translate3d(-1%,9%,0) rotate(-2deg) scale(1.14)}}
+@media(prefers-reduced-motion:reduce){.proof-counts:before,.proof-counts:after{animation:none}}
