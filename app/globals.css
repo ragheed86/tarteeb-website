@@ -548,3 +548,15 @@ header nav{margin:0 auto;justify-content:center}
 }
 
 @media(prefers-reduced-motion:reduce){.about-motion img{animation:none;opacity:0}.about-motion img:first-child{opacity:1;transform:none}}
+
+/* Apple-glass comparison and proof cards */
+.compare:before{content:"";position:absolute;z-index:3;top:0;bottom:0;left:var(--split);width:58px;transform:translateX(-50%);pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22) 34%,var(--peach) 47% 53%,rgba(255,255,255,.22) 66%,transparent);-webkit-backdrop-filter:blur(11px) saturate(145%);backdrop-filter:blur(11px) saturate(145%);-webkit-mask-image:linear-gradient(90deg,transparent,#000 28% 72%,transparent);mask-image:linear-gradient(90deg,transparent,#000 28% 72%,transparent)}
+.compare .before:after{display:none}
+.compare:after{background:rgba(249,177,167,.82);box-shadow:0 10px 30px rgba(31,61,58,.2),0 0 0 1px rgba(255,255,255,.5);-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%)}
+.proof-counts{padding:24px;gap:0;background:linear-gradient(125deg,#55d2cd,#f4aaa0)}
+.proof-counts div{background:rgba(255,255,255,.2);border:0!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);-webkit-backdrop-filter:blur(18px) saturate(145%);backdrop-filter:blur(18px) saturate(145%)}
+.proof-counts div:nth-child(1),.proof-counts div:nth-child(2){border-bottom:1px solid rgba(31,61,58,.28)!important}
+.proof-counts div:nth-child(1),.proof-counts div:nth-child(3){border-left:1px solid rgba(31,61,58,.28)!important}
+.service-state.before-state{background:rgba(249,177,167,.92);color:var(--ink);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.service-state.after-state{background:rgba(97,213,209,.9);color:var(--ink);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+@media(max-width:767px){.proof-counts{padding:14px}.proof-counts div{background:rgba(255,255,255,.18)}}
