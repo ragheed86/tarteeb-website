@@ -100,7 +100,21 @@ export default function TarteeebSite(){
     <header><a className="official-logo" href="#top" aria-label="ترتيب Arrange and Organize"><img src="/tarteeb-logo-official.png" alt="شعار ترتيب الرسمي"/></a><button className="menu" aria-label="فتح القائمة" onClick={()=>setMenu(!menu)}>☰</button><nav className={menu?"open":""}>{[["قبل وبعد","top"],["خدماتنا","services"],["منهج ترتيب","method"],["المدونة","blog"],["من نحن","about"],["الأسئلة الشائعة","faq"]].map(([l,id])=><a key={id} href={`#${id}`} onClick={()=>setMenu(false)}>{l}</a>)}</nav></header>
     <section id="top" className="comparison-hero"><BeforeAfter priority label="المطبخ" before="/images/kitchen-before.jpg" after="/images/kitchen-organized.jpg"/></section>
     <section className="brand-intro"><p>ترتيب تحوّل مساحاتك المزدحمة إلى أنظمة عملية وجميلة، مصممة لتناسب حياتك وتستمر معك.</p></section>
-    <section className="proof-counts" aria-label="أرقام ترتيب">{stats.map(({Icon,value,label})=><div key={label}><Icon aria-hidden="true"/><strong><CountUp value={value}/></strong><span>{label}</span></div>)}</section>
+    <section className="proof-counts" aria-labelledby="proof-title">
+      <div className="proof-copy">
+        <p className="proof-kicker">أرقام ترتيب</p>
+        <h2 id="proof-title">أثر يُرى في كل مساحة.</h2>
+        <p>كل رقم يمثل مساحة أصبحت أوضح، وروتينًا يوميًا صار أخف.</p>
+      </div>
+      <div className="proof-grid">
+        {stats.map(({Icon,value,label},index)=><article className="proof-stat" key={label} style={{"--stat-delay":`${index * 110}ms`} as React.CSSProperties}>
+          <span className="proof-index" aria-hidden="true">0{index+1}</span>
+          <span className="proof-icon"><Icon aria-hidden="true"/></span>
+          <strong><CountUp value={value}/></strong>
+          <span className="proof-label">{label}</span>
+        </article>)}
+      </div>
+    </section>
     <section id="services" className="section services-section"><div className="section-head"><div><p className="eyebrow services-title">خدماتنا</p><h2>نرتب المساحة حول حياتك.</h2></div></div><div className="service-grid">{services.map(([n,d,before,after])=><ServiceCard key={n} name={n} description={d} before={before} after={after}/>)}</div></section>
     <section id="method" className="method section"><div className="section-head"><div><p className="eyebrow">طريقتنا معك</p><h2>من الفوضى إلى الراحة، خطوة بخطوة.</h2></div><p>ست محطات واضحة؛ اختاري أي محطة لتعرفي ماذا يحدث فيها.</p></div><MethodExperience/></section>
     <section id="work" className="section transformations"><div className="section-head"><div><p className="eyebrow">قصص من بيوت حقيقية</p><h2>قبل وبعد… وحياة صارت أخف.</h2></div><p>اسحبي الخط داخل الصورة واكتشفي كيف غيّر النظام تفاصيل يومهم.</p></div><div className="transform-grid two"><article><h3>غرفة الملابس</h3><BeforeAfter label="غرفة الملابس" before="/images/closet-before.jpg" after="/images/closet-organized.jpg"/><div className="story-preview"><strong>دلال الجعويني</strong><p>كانت تبدأ صباحها بالبحث بين القطع؛ واليوم ترى كل خياراتها وتعيدها إلى مكانها بسهولة.</p><a href="/blog/closet-reset">للمزيد عن قصة دلال ←</a></div></article><article><h3>المخزن</h3><BeforeAfter label="المخزن" before="/images/storage-before.jpg" after="/images/storage-organized.jpg"/><div className="story-preview"><strong>مها العتيبي</strong><p>كان المخزون يتكرر ويختفي بين الصناديق؛ الآن تعرف مها الموجود والناقص من نظرة واحدة.</p><a href="/blog/storage-system">للمزيد عن قصة مها ←</a></div></article></div></section>
