@@ -613,10 +613,17 @@ header nav{margin:0 auto;justify-content:center}
   background:rgba(218,197,239,.9);
   animation:proofGlow 11s ease-in-out -3s infinite alternate;
 }
+.proof-counts .proof-copy,
+.proof-counts .proof-grid{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
 .proof-counts .proof-copy{
   display:block;
   text-align:center;
-  border:0;
   color:var(--ink);
 }
 .proof-kicker{
