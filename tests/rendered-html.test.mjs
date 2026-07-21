@@ -1,87 +1,61 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
-const templateRoot = new URL("../", import.meta.url);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
+const htmlRoutes = [
+  "/", "/home-organizing-riyadh", "/wardrobe-organizing", "/kitchen-organizing",
+  "/storage-room-organizing", "/kids-room-organizing", "/moving-organizing",
+  "/office-organizing", "/projects", "/about", "/faq", "/request-quote", "/privacy",
+  "/blog/closet-reset", "/blog/kids-room", "/blog/kitchen-zones", "/blog/storage-system", "/blog/weekly-reset",
+];
 
-async function render() {
+async function request(path) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
+  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-${Math.random()}`);
   const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
+  return worker.fetch(new Request(`https://tarteebandmore.com${path}`, { headers: { accept: "text/html" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("server-renders the starter loading skeleton", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.match(html, developmentPreviewMeta);
-  assert.match(html, /<title>Your site is taking shape<\/title>/i);
-  assert.match(html, /Codex is working/);
-  assert.match(html, /Your site is taking shape/);
-  assert.match(html, /Codex is building the first version/);
-  assert.match(html, /react-loading-skeleton/);
-  assert.match(html, /role="status"/);
+test("all public HTML routes render with SEO essentials", async () => {
+  for (const route of htmlRoutes) {
+    const response = await request(route);
+    assert.equal(response.status, 200, route);
+    const html = await response.text();
+    assert.match(html, /<html[^>]*lang="ar"[^>]*dir="rtl"/i, route);
+    assert.match(html, /<title>[^<]+<\/title>/i, route);
+    assert.match(html, /<meta[^>]+name="description"/i, route);
+    assert.match(html, /<link[^>]+rel="canonical"/i, route);
+    assert.equal((html.match(/<h1[\s>]/gi) ?? []).length, 1, `${route} must have one H1`);
+  }
 });
 
-test("keeps the loading skeleton scoped and disposable", async () => {
-  const [preview, css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("SkeletonPreview.tsx", previewRoot), "utf8"),
-    readFile(new URL("preview.css", previewRoot), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(previewRoot),
-  ]);
+test("home page exposes local business and FAQ structured data", async () => {
+  const html = await (await request("/")).text();
+  assert.match(html, /ProfessionalService/);
+  assert.match(html, /LocalBusiness/);
+  assert.match(html, /FAQPage/);
+  assert.match(html, /نحوّل الفوضى إلى نظام يناسب أسلوب حياتك/);
+});
 
-  assert.deepEqual(files.sort(), ["SkeletonPreview.tsx", "preview.css"]);
-  assert.match(preview, /from "react-loading-skeleton"/);
-  assert.match(preview, /baseColor="#eceae7"/);
-  assert.match(preview, /highlightColor="#f9f8f6"/);
-  assert.match(preview, /duration=\{2\.8\}/);
-  assert.match(preview, /sites-skeleton-search-placeholder/);
-  assert.match(packageJson, /"react-loading-skeleton": "3\.5\.0"/);
+test("service page exposes Service, FAQ and breadcrumb data", async () => {
+  const html = await (await request("/kitchen-organizing")).text();
+  assert.match(html, /BreadcrumbList/);
+  assert.match(html, /FAQPage/);
+  assert.match(html, /\"@type\":\"Service\"/);
+});
 
-  const shellIndex = preview.indexOf('className="sites-skeleton-shell"');
-  const statusIndex = preview.indexOf('className="sites-skeleton-status"');
-  assert.ok(shellIndex >= 0 && statusIndex > shellIndex);
-  assert.match(css, /position:\s*fixed/);
-  assert.match(css, /inset:\s*0/);
-  assert.match(css, /opacity:\s*0\.52/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /#020617|canvas|pets|progress/i);
-  assert.doesNotMatch(
-    preview,
-    /loading-spinner|status-mark|status-progress|canvas|cookie|random/i,
-  );
+test("unknown routes return a real 404", async () => {
+  const response = await request("/this-page-does-not-exist");
+  assert.equal(response.status, 404);
+  assert.match(await response.text(), /هذه الصفحة غير موجودة/);
+});
 
-  assert.match(page, /export const metadata:\s*Metadata/);
-  assert.match(page, /"codex-preview": "development"/);
-  assert.match(page, /<SkeletonPreview \/>/);
-  assert.match(layout, /title:\s*"Starter Project"/);
-  assert.doesNotMatch(layout, /codex-preview|_sites-preview|themeColor|\bViewport\b/);
-  assert.doesNotMatch(css, /(^|\s)(html|body)\s*\{/m);
-
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
+test("robots and sitemap endpoints are generated", async () => {
+  const robots = await request("/robots.txt");
+  assert.equal(robots.status, 200);
+  assert.match(await robots.text(), /Sitemap: https:\/\/tarteebandmore\.com\/sitemap\.xml/);
+  const sitemap = await request("/sitemap.xml");
+  assert.equal(sitemap.status, 200);
+  const xml = await sitemap.text();
+  assert.match(xml, /home-organizing-riyadh/);
+  assert.match(xml, /request-quote/);
 });

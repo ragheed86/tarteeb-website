@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { PiCoatHangerLight, PiDoorOpenLight, PiGridFourLight, PiUserCircleLight } from "react-icons/pi";
 import { blogPosts } from "./blog/articles";
+import { whatsappUrl } from "./lib/site-data";
 
 const services = [
   ["المطابخ", "مناطق واضحة للتحضير والمخزون.", "/images/kitchen-before.webp", "/images/kitchen-organized.webp"],
@@ -32,7 +33,7 @@ const stats = [
 
 function CountUp({value}:{value:number}){
   const [shown,setShown]=useState(0);
-  useEffect(()=>{let start=0;const duration=1400;const began=performance.now();const tick=(now:number)=>{const p=Math.min((now-began)/duration,1);setShown(Math.round(value*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(tick)};const id=requestAnimationFrame(tick);return()=>cancelAnimationFrame(id)},[value]);
+  useEffect(()=>{const duration=1400;const began=performance.now();const tick=(now:number)=>{const p=Math.min((now-began)/duration,1);setShown(Math.round(value*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(tick)};const id=requestAnimationFrame(tick);return()=>cancelAnimationFrame(id)},[value]);
   return <>{shown.toLocaleString("en-US")}</>;
 }
 
@@ -69,22 +70,12 @@ function ServiceCard({name,description,before,after}:{name:string;description:st
   return <article className={`service ${showAfter?"is-after":""}`} tabIndex={0} onClick={()=>setShowAfter(!showAfter)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setShowAfter(!showAfter)}}} aria-label={`${name}: اضغطي للتبديل بين قبل وبعد`}><div className="service-media"><img className="service-before" src={before} alt={`${name} قبل التنظيم`} loading="lazy" decoding="async" width="1280" height="853"/><img className="service-after" src={after} alt={`${name} بعد التنظيم`} loading="lazy" decoding="async" width="1280" height="853"/><span className="service-state before-state">قبل</span><span className="service-state after-state">بعد</span><button type="button" className="service-toggle" onClick={e=>{e.stopPropagation();setShowAfter(!showAfter)}}>{showAfter?"شاهدي قبل":"شاهدي بعد"}</button></div><div><h3>{name}</h3><p>{description}</p><a href="#assessment" onClick={e=>e.stopPropagation()}>اطلبي تقييمها ←</a></div></article>
 }
 
-function Quiz() {
-  const [choice, setChoice] = useState("");
-  const result = useMemo(() => choice ? ({"المطبخ":"تنظيم المطبخ","الملابس":"ترتيب غرفة الملابس","التخزين":"تنظيم المستودع","متعددة":"تنظيم المنزل بالكامل"} as Record<string,string>)[choice] : "", [choice]);
-  return <div className="quiz-card">
-    <p className="eyebrow">اختبار من دقيقة واحدة</p><h3>ما المساحة الأكثر حاجة للترتيب في منزلك؟</h3>
-    <div className="quiz-options">{[["المطبخ","المطبخ"],["الملابس","غرفة الملابس"],["التخزين","المستودع"],["متعددة","عدة مساحات"]].map(([v,l])=><button key={v} onClick={()=>setChoice(v)} className={choice===v?"selected":""}>{l}</button>)}</div>
-    {result && <div className="quiz-result"><span>توصيتنا لك</span><strong>{result}</strong><a href={`https://wa.me/?text=${encodeURIComponent(`مرحبًا، نتيجتي في اختبار ترتيب هي: ${result}. أرغب في تقييم هذه المساحة.`)}`} target="_blank">أرسلي النتيجة عبر واتساب</a></div>}
-  </div>;
-}
-
 function Assessment() {
   const [step,setStep]=useState(1); const [done,setDone]=useState(false);
   const [form,setForm]=useState({name:"",phone:"",area:"",space:"المطبخ",goal:"إنشاء نظام سهل الاستمرار",notes:""});
   const set=(k:string,v:string)=>setForm({...form,[k]:v});
-  const msg=`مرحبًا، أرغب في طلب تقييم لمساحتي من شركة ترتيب.%0Aالاسم: ${form.name}%0Aنوع المساحة: ${form.space}%0Aالحي: ${form.area}%0Aالهدف: ${form.goal}%0Aالملاحظات: ${form.notes}%0Aسأرسل الصور أو الفيديوهات للمساحة عبر المحادثة.`;
-  if(done) return <div className="assessment success"><div className="assessment-content"><span>✓</span><h3>طلبك جاهز للمراجعة</h3><p>راجعي الملخص، ثم افتحي واتساب عندما تكونين مستعدة. لن تُرسل أي بيانات تلقائيًا.</p><dl><dt>الاسم</dt><dd>{form.name||"—"}</dd><dt>المساحة</dt><dd>{form.space}</dd><dt>الهدف</dt><dd>{form.goal}</dd></dl></div><div className="form-actions"><button onClick={()=>setDone(false)}>تعديل المعلومات</button><a className="primary" href={`https://wa.me/?text=${msg}`} target="_blank">فتح رسالة واتساب</a></div></div>;
+  const msg=`مرحبًا، أرغب في طلب تقييم لمساحتي من شركة ترتيب.\nالاسم: ${form.name}\nرقم الجوال: ${form.phone}\nنوع المساحة: ${form.space}\nالحي: ${form.area}\nالهدف: ${form.goal}\nالملاحظات: ${form.notes}\nسأرسل الصور أو الفيديوهات للمساحة عبر المحادثة.`;
+  if(done) return <div className="assessment success"><div className="assessment-content"><span>✓</span><h3>طلبك جاهز للمراجعة</h3><p>راجعي الملخص، ثم افتحي واتساب عندما تكونين مستعدة. لن تُرسل أي بيانات تلقائيًا.</p><dl><dt>الاسم</dt><dd>{form.name||"—"}</dd><dt>المساحة</dt><dd>{form.space}</dd><dt>الهدف</dt><dd>{form.goal}</dd></dl></div><div className="form-actions"><button onClick={()=>setDone(false)}>تعديل المعلومات</button><a className="primary" href={whatsappUrl(msg)} target="_blank" rel="noreferrer" data-event="quote_form_submit">فتح رسالة واتساب</a></div></div>;
   return <div className="assessment"><div className="progress"><span style={{width:`${step*25}%`}} /></div><div className="assessment-content"><p className="eyebrow">الخطوة {step} من 4</p>
     {step===1&&<><h3>معلومات التواصل</h3><div className="fields"><label>الاسم<input value={form.name} onChange={e=>set("name",e.target.value)} /></label><label>رقم الجوال<input inputMode="tel" value={form.phone} onChange={e=>set("phone",e.target.value)} /></label><label>الحي<input value={form.area} onChange={e=>set("area",e.target.value)} /></label></div></>}
     {step===2&&<><h3>معلومات المساحة</h3><div className="fields"><label>نوع المساحة<select value={form.space} onChange={e=>set("space",e.target.value)}><option>المطبخ</option><option>غرفة الملابس</option><option>المستودع</option><option>المنزل بالكامل</option><option>مكتب</option></select></label><label>حالة المكان<select><option>مستخدم حاليًا</option><option>منزل جديد</option><option>قبل الانتقال</option><option>بعد الانتقال</option></select></label></div></>}
@@ -96,7 +87,7 @@ function Assessment() {
 
 export default function TarteeebSite(){
   const [menu,setMenu]=useState(false);
-  return <main>
+  return <main><h1 className="seo-only">نحوّل الفوضى إلى نظام يناسب أسلوب حياتك</h1>
     <header><a className="official-logo" href="#top" aria-label="ترتيب Arrange and Organize"><img src="/tarteeb-logo-official.png" alt="شعار ترتيب الرسمي" decoding="async" width="240" height="96"/></a><button className="menu" aria-label="فتح القائمة" onClick={()=>setMenu(!menu)}>☰</button><nav className={menu?"open":""}>{[["قبل وبعد","top"],["خدماتنا","services"],["منهج ترتيب","method"],["المدونة","blog"],["من نحن","about"],["الأسئلة الشائعة","faq"]].map(([l,id])=><a key={id} href={`#${id}`} onClick={()=>setMenu(false)}>{l}</a>)}</nav></header>
     <section id="top" className="comparison-hero"><BeforeAfter priority label="المطبخ" before="/images/kitchen-before.webp" after="/images/kitchen-organized.webp"/></section>
     <section className="brand-intro"><p>ترتيب تحوّل مساحاتك المزدحمة إلى أنظمة عملية وجميلة، مصممة لتناسب حياتك وتستمر معك.</p></section>
@@ -122,6 +113,6 @@ export default function TarteeebSite(){
     <section id="blog" className="section blog-section"><div className="section-head"><div><h2>أفكار عملية لمساحة تستمر.</h2></div><p>قصص حقيقية وإرشادات بسيطة تساعدك على بناء نظام يناسب يومك.</p></div><div className="blog-grid">{blogPosts.map((post)=><article key={post.slug}><a className="blog-image" href={`/blog/${post.slug}`}><img src={post.image} alt={post.title} loading="lazy" decoding="async" width="1280" height="853"/></a><div><span>{post.category} · {post.readTime}</span><h3><a href={`/blog/${post.slug}`}>{post.title}</a></h3><p>{post.excerpt}</p><a className="blog-link" href={`/blog/${post.slug}`}>اقرئي المقال ←</a></div></article>)}</div></section>
     <section id="faq" className="section faq"><p className="eyebrow">قبل أن تبدئي</p><h2>أسئلة شائعة</h2><div>{faqs.map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><div className="faq-answer"><p>{a}</p></div></details>)}</div></section>
     <section id="assessment" className="section assess-wrap"><div className="assessment-copy"><p className="eyebrow">طلب تقييم المساحة</p><h2>ابدئي بخطوات بسيطة</h2><p>أخبرينا عن المساحة وهدفك، ثم راجعي الملخص وافتحي رسالة واتساب الجاهزة.</p></div><Assessment /></section>
-    <a className="whatsapp" href="https://wa.me/?text=مرحبًا،%20أرغب%20في%20تقييم%20مساحتي" target="_blank" aria-label="أرسلي صور المساحة عبر واتساب"><span>و</span></a>
+    <a className="whatsapp" href={whatsappUrl("مرحبًا، أرغب في تقييم مساحتي والحصول على عرض سعر.")} target="_blank" rel="noreferrer" aria-label="أرسلي صور المساحة عبر واتساب" data-event="whatsapp_click"><span>و</span></a>
   </main>
 }

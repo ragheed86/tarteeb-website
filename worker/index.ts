@@ -29,6 +29,12 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    if (url.hostname === "www.tarteebandmore.com" || (url.hostname === "tarteebandmore.com" && url.protocol === "http:")) {
+      url.protocol = "https:";
+      url.hostname = "tarteebandmore.com";
+      return Response.redirect(url.toString(), 301);
+    }
+
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       return handleImageOptimization(request, {
@@ -40,7 +46,13 @@ const worker = {
       }, allowedWidths);
     }
 
-    return handler.fetch(request, env, ctx);
+    const response = await handler.fetch(request, env, ctx);
+    const headers = new Headers(response.headers);
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    if (url.pathname.startsWith("/_next/static/") || /\.(?:webp|avif|png|jpg|jpeg|svg|woff2)$/.test(url.pathname)) headers.set("Cache-Control", "public, max-age=31536000, immutable");
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   },
 };
 
