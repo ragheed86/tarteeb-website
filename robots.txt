@@ -1,0 +1,6 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://tarteebandmore.com/sitemap.xml
+Host: https://tarteebandmore.com
