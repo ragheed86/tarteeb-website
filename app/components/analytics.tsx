@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 declare global { interface Window { dataLayer?: unknown[] } }
 
+const DEFAULT_GA_MEASUREMENT_ID = "G-D66CXSVT4T";
+
 export function track(event: string, params: Record<string, unknown> = {}) {
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event, ...params });
@@ -11,10 +13,15 @@ export function track(event: string, params: Record<string, unknown> = {}) {
 
 export default function Analytics() {
   useEffect(() => {
-    const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+    const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || DEFAULT_GA_MEASUREMENT_ID;
     const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
     if (gaId) {
-      const external = document.createElement("script"); external.async = true; external.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`; document.head.appendChild(external);
+      if (!document.querySelector(`script[src="https://www.googletagmanager.com/gtag/js?id=${gaId}"]`)) {
+        const external = document.createElement("script");
+        external.async = true;
+        external.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+        document.head.appendChild(external);
+      }
       window.dataLayer = window.dataLayer || []; window.dataLayer.push(["js", new Date()]); window.dataLayer.push(["config", gaId]);
     }
     if (gtmId) {
