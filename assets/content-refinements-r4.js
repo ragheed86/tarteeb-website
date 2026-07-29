@@ -8,12 +8,26 @@
     "/moving-organizing",
   ];
 
+  const serviceTitles = [
+    "ترتيب وتنظيم المطابخ",
+    "ترتيب وتنظيم غرف الملابس",
+    "ترتيب وتنظيم المستودعات",
+    "ترتيب وتنظيم غرف الأطفال",
+    "ترتيب وتنظيم المكاتب",
+    "ترتيب وتنظيم المنزل بعد الانتقال",
+  ];
+
   const applyRefinements = () => {
     document.querySelectorAll(".service-grid .service").forEach((card, index) => {
+      const title = card.querySelector("h3");
       const link = card.querySelector("a");
-      if (!link || !serviceRoutes[index]) return;
-      link.href = serviceRoutes[index];
-      link.textContent = "تفاصيل الخدمة ←";
+      if (title && serviceTitles[index]) {
+        title.textContent = serviceTitles[index];
+      }
+      if (link && serviceRoutes[index]) {
+        link.href = serviceRoutes[index];
+        link.textContent = "تفاصيل الخدمة ←";
+      }
     });
 
     const methodLabel = document.querySelector("#method .section-head .eyebrow");
