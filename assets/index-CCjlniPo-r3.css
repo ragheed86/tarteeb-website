@@ -6,3 +6,23 @@
 .after-tag{background:var(--peach);color:var(--ink)}
 .proof-counts div,.proof-counts div:first-child,.proof-counts div:nth-child(2),.proof-counts div:nth-child(3),.proof-counts div:nth-child(4),.proof-counts .proof-copy,.proof-counts .proof-grid,.proof-counts .proof-stat{border:0!important;box-shadow:none!important}
 @media (width<=767px){header{height:164px}header>.official-logo{width:72vw;min-width:296px;max-width:410px;height:148px}nav{top:164px}}
+
+/* Browser-requested content and alignment refinements. */
+.brand-intro{display:none!important}
+.proof-copy>p:last-child{display:none!important}
+#method .section-head .eyebrow{color:var(--ink)!important;letter-spacing:0!important;margin-bottom:16px!important;font-size:clamp(20px,2.2vw,28px)!important;font-weight:700!important;line-height:1.35!important}
+#method .section-head .eyebrow:after{display:none!important}
+.transformations>.section-head>p{display:none!important}
+.story-preview{position:relative}
+.story-preview>a{position:absolute;top:22px;left:4px;white-space:nowrap;margin:0}
+.about-copy>.eyebrow{display:none!important}
+.assessment-copy>h2{display:none!important}
+footer>div:nth-of-type(3)>span{display:block;width:100%;text-align:center}
+footer .copyright{grid-column:1/-1!important;width:100%;text-align:center!important}
+@media (width<=767px){
+  #method .section-head .eyebrow{font-size:24px!important}
+  .story-preview{padding-top:22px}
+  .story-preview>a{top:22px;left:0;font-size:12px}
+  footer>div:nth-of-type(3){align-items:center}
+  footer .copyright{margin-inline:auto!important}
+}
