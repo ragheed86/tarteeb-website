@@ -1,118 +1,76 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft } from "lucide-react";
 import { PiCoatHangerLight, PiDoorOpenLight, PiGridFourLight, PiUserCircleLight } from "react-icons/pi";
-import { blogPosts } from "./blog/articles";
 import { whatsappUrl } from "./lib/site-data";
+import BeforeAfter from "./components/before-after";
 
-const services = [
-  ["المطابخ", "مناطق واضحة للتحضير والمخزون.", "/images/kitchen-before.webp", "/images/kitchen-organized.webp"],
-  ["غرف الملابس", "اختيار أسرع وترتيب أسهل.", "/images/closet-before.webp", "/images/closet-organized.webp"],
-  ["المستودعات", "مساحة مستغلة ومخزون معروف.", "/images/storage-before.webp", "/images/storage-organized.webp"],
-  ["غرف الأطفال", "نظام بسيط يستطيع الطفل استخدامه.", "/images/storage-before.webp", "/images/playroom-organized.webp"],
-  ["المكاتب", "أدوات وملفات في متناولك.", "/images/closet-before.webp", "/images/office-organized.webp"],
-  ["الانتقال", "منزل جديد مرتب من اليوم الأول.", "/images/storage-before.webp", "/images/storage-organized.webp"],
-];
+type Lang = "ar" | "en";
 
-const steps = [
-  ["01", "نفهم روتينك", "نتعرف على استخدامك للمساحة واحتياجات أفراد المنزل."],
-  ["02", "نفرز ونصنف", "نقسم المحتويات إلى مجموعات واضحة حسب الاستخدام."],
-  ["03", "نصمم النظام", "نحدد التوزيع الأنسب ومكانًا منطقيًا لكل فئة."],
-  ["04", "نختار الأدوات", "نقيس أولًا ثم نختار المنظمات المناسبة بعد موافقتك."],
-  ["05", "ننظم وننفذ", "نطبق النظام بصورة عملية وجمالية مع إشراف كامل."],
-  ["06", "نسلّم نظامًا مستدامًا", "نشرح النظام لك أو للعاملة للمحافظة عليه يوميًا."],
-];
+const content = {
+  ar: {
+    langName: "English", menu: ["الأثر", "خدماتنا", "منهجنا", "قصص العميلات", "من نحن", "الأسئلة الشائعة"],
+    hero: ["نظام يليق بحياتك، لا فوضى تُثقلها.", "ترتيب تحوّل مساحاتك إلى نظام هادئ ومتقن، يمنحك وقتك وطاقتك لما يستحقها فعلًا."],
+    impact: ["أثرٌ تشعرين به في كل زاوية من بيتك.", "كل رقم هنا يعني بيتًا استعاد هدوءه، وامرأة استعادت وقتها."],
+    stats: ["عميلة", "غرفة", "خزانة", "علاقة"],
+    services: ["نصمم النظام حول إيقاع حياتك.", "كل مساحة في بيتك لها دور، ونحن نمنحها نظامًا يليق بهذا الدور."],
+    serviceItems: [
+      ["ترتيب وتنظيم المطابخ", "مساحة تُلهمك الطهي بدل أن تُرهقك."], ["ترتيب وتنظيم غرف الملابس", "كل قطعة في مكانها، وكل صباح أخف."],
+      ["ترتيب وتنظيم المستودعات", "مخزون تعرفينه من نظرة، لا من بحث."], ["ترتيب وتنظيم غرف الأطفال", "نظام بسيط يكبر مع طفلك، ويشاركه بسهولة."],
+      ["ترتيب وتنظيم المكاتب", "تركيز أوضح، حين تكون أدواتك في متناولك."], ["ترتيب وتنظيم المنزل بعد الانتقال", "بداية جديدة، بنظام جاهز من أول يوم."]
+    ],
+    method: ["من الفوضى إلى الراحة، بخطى واثقة.", "ست محطات مدروسة، تأخذك من الإرهاق إلى بيت يعمل لصالحك."],
+    steps: [["نفهم روتينك", "نصغي إلى تفاصيل يومك قبل أن نلمس مساحتك."], ["نفرز ونصنف", "نُعيد قراءة كل قطعة بعين تعرف قيمتها."], ["نصمم النظام", "نبني هيكلًا يخدم احتياجاتك الفعلية."], ["نختار الأدوات", "بلا مبالغة، وبلا شراء قبل القياس."], ["ننظم وننفذ", "بأيدٍ مدرّبة، وخصوصية تامة."], ["نسلّم نظامًا مستدامًا", "يبقى مرتبًا معك، لا لأجلك فقط."]],
+    stories: ["قبل وبعد… وحياة صارت أخف.", "اسحبي الخط، وشاهدي كيف يُعيد النظام تشكيل تفاصيل يومك."],
+    storyItems: [["دلال الجعويني — غرفة الملابس", "كانت صباحاتها تبدأ بالبحث؛ اليوم تبدأ باختيار واثق."], ["مها العتيبي — المخزن", "لم تعد تشتري ما تملكه أصلًا؛ صار كل شيء في متناول نظرها."]],
+    about: ["نرتب بيتك كما لو كان بيتنا.", "فريق سعودي مدرّب، يعمل بإشراف دقيق، واحترام تام لخصوصيتك — بلا أحكام، وبلا تصوير من دون إذنك.", "متابعة ما بعد التسليم", "نعود إليك بعد أسبوعين، لنتأكد أن النظام لا يزال يخدمك كما يجب."],
+    blog: ["أفكار تصنع بيتًا يستمر مرتبًا.", "قصص حقيقية، وخطوات عملية، لبيت ينظم نفسه معك يومًا بعد يوم."],
+    blogItems: ["من فوضى يومية إلى غرفة ملابس تخدم دلال", "خمس مناطق تجعل مطبخك أسهل كل يوم", "مخزن تعرفين محتواه من أول نظرة", "غرفة يرتبها طفلك بنفسه", "عشرون دقيقة تحافظ على ترتيب بيتك أسبوعيًا"],
+    faqTitle: "الأسئلة الشائعة", faqs: [["كيف يُحدَّد سعر الخدمة؟", "بحسب مساحة المكان، وكمية المحتوى، والوقت المتوقع. نرسل لك نطاق السعر خلال 24 ساعة من مراجعة الصور."], ["هل أدوات التخزين مشمولة؟", "تُحسب بشكل منفصل عند الحاجة، ولا نشتري شيئًا قبل القياس وموافقتك."], ["هل تشمل الخدمة التنظيف؟", "خدمتنا تركّز على الفرز والتصميم والتنظيم، وليست خدمة تنظيف منزلي."], ["هل يلزم تواجدي؟", "حضورك مهم في القرارات الأولى، ويكمل فريقنا التنفيذ بعد الاتفاق معك."], ["كيف تحافظون على خصوصيتي؟", "نتعامل مع بيتك بسرية تامة، ولا نصور أو ننشر أي مساحة دون إذنك الصريح."], ["هل يمكن تدريب العاملة المنزلية على النظام؟", "بالتأكيد، نشرح لها كيفية الحفاظ على النظام ليبقى مرتبًا بعد التسليم."]],
+    cta: ["ابدئي بخطوة واحدة بسيطة.", "احجزي استشارتك المجانية، ودعي بيتك يتحدث عن نفسه.", "احجزي استشارتك"],
+    footer: ["أنظمة ترتيب متقنة، لمنازل ومكاتب الرياض.", "الرياض، المملكة العربية السعودية"], before: "قبل", after: "بعد"
+  },
+  en: {
+    langName: "العربية", menu: ["Impact", "Services", "Our Method", "Client Stories", "About", "FAQ"],
+    hero: ["A system worthy of your life, not chaos that weighs it down.", "Tarteeb transforms your spaces into calm, considered order — giving you back the time and energy for what truly matters."],
+    impact: ["An impact you feel in every corner of your home.", "Every number here means a home that found its calm again, and a woman who reclaimed her time."],
+    stats: ["Clients", "Rooms", "Closets", "Hangers"],
+    services: ["We design order around the rhythm of your life.", "Every space in your home has a purpose — we give it a system worthy of that purpose."],
+    serviceItems: [["Kitchen Organizing", "A space that inspires you to cook, instead of wearing you down."], ["Wardrobe Organizing", "Every piece in its place, and every morning a little lighter."], ["Storage Room Organizing", "Inventory you know at a glance, not after a search."], ["Kids' Room Organizing", "A simple system that grows with your child, and invites them in."], ["Office Organizing", "Sharper focus, when everything you need is within reach."], ["Post-Move Organizing", "A fresh start, with a system ready from day one."]],
+    method: ["From chaos to calm, one confident step at a time.", "Six deliberate stages, carrying you from overwhelm to a home that works for you."],
+    steps: [["We Understand Your Routine", "We listen to your daily details before we touch a single space."], ["We Sort & Categorize", "We revisit every item with an eye that knows its worth."], ["We Design the System", "We build a structure that serves your real needs."], ["We Select the Tools", "No excess, and nothing purchased before measuring."], ["We Organize & Execute", "By trained hands, with complete discretion."], ["We Deliver a Lasting System", "One that stays organized with you, not just for you."]],
+    stories: ["Before and after… and a life made lighter.", "Drag the line, and watch how a new system reshapes the details of everyday life."],
+    storyItems: [["Dalal Al-Juwaini — The Wardrobe", "Her mornings once began with searching; now they begin with confident choosing."], ["Maha Al-Otaibi — The Storage Room", "She no longer buys what she already owns — everything is now a glance away."]],
+    about: ["We organize your home as if it were our own.", "A trained Saudi team, working under careful supervision, with complete respect for your privacy — no judgment, and no photography without your consent.", "Post-Delivery Follow-Up", "We return two weeks later, to make sure the system is still serving you as it should."],
+    blog: ["Ideas that build a home that stays organized.", "Real stories and practical steps, for a home that organizes itself with you, day after day."],
+    blogItems: ["From Daily Clutter to a Wardrobe That Serves Dalal", "Five Zones That Make Your Kitchen Easier Every Day", "A Storage Room You Know at a Glance", "A Room Your Child Can Organize Themselves", "Twenty Minutes That Keep Your Home Organized, Weekly"],
+    faqTitle: "Frequently Asked Questions", faqs: [["How is the service price determined?", "By the size of the space, the volume of items, and the expected time. We send a price range within 24 hours of reviewing your photos."], ["Are storage tools included?", "They are calculated separately when needed — nothing is purchased before measuring and your approval."], ["Does the service include cleaning?", "Our service focuses on sorting, design, and organization — it is not a household cleaning service."], ["Do I need to be present?", "Your presence matters for the initial decisions; our team completes the execution once we agree on the essentials."], ["How do you protect my privacy?", "We handle your home with complete discretion and never photograph or share any space without your explicit consent."], ["Can you train household staff on the system?", "Absolutely — we show them how to maintain the system so it stays organized after delivery."]],
+    cta: ["Begin with one simple step.", "Book your complimentary consultation, and let your home speak for itself.", "Book your consultation"],
+    footer: ["Refined organizing systems, for the homes and offices of Riyadh.", "Riyadh, Saudi Arabia"], before: "Before", after: "After"
+  }
+} as const;
 
-const stats = [
-  { Icon: PiUserCircleLight, value: 139, label: "عميل" },
-  { Icon: PiDoorOpenLight, value: 230, label: "غرفة" },
-  { Icon: PiGridFourLight, value: 193, label: "خزانة" },
-  { Icon: PiCoatHangerLight, value: 7000, label: "علاقة" },
-];
+const images = [["/images/kitchen-before.webp", "/images/kitchen-organized.webp"], ["/images/closet-before.webp", "/images/closet-organized.webp"], ["/images/storage-before.webp", "/images/storage-organized.webp"], ["/images/storage-before.webp", "/images/playroom-organized.webp"], ["/images/closet-before.webp", "/images/office-organized.webp"], ["/images/storage-before.webp", "/images/storage-organized.webp"]];
+const icons = [PiUserCircleLight, PiDoorOpenLight, PiGridFourLight, PiCoatHangerLight];
+const values = [139, 230, 193, 7000];
 
-function CountUp({value}:{value:number}){
-  const [shown,setShown]=useState(0);
-  useEffect(()=>{const duration=1400;const began=performance.now();const tick=(now:number)=>{const p=Math.min((now-began)/duration,1);setShown(Math.round(value*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(tick)};const id=requestAnimationFrame(tick);return()=>cancelAnimationFrame(id)},[value]);
-  return <>{shown.toLocaleString("en-US")}</>;
-}
+function CountUp({ value }: { value: number }) { const [shown, setShown] = useState(0); useEffect(() => { const started = performance.now(); let id = 0; const tick = (now: number) => { const p = Math.min((now-started)/1200, 1); setShown(Math.round(value*(1-Math.pow(1-p,3)))); if (p<1) id=requestAnimationFrame(tick); }; id=requestAnimationFrame(tick); return () => cancelAnimationFrame(id); }, [value]); return <>{shown.toLocaleString("en-US")}</>; }
 
-function MethodExperience(){
-  const [active,setActive]=useState(0);
-  useEffect(()=>{const timer=setInterval(()=>setActive(v=>(v+1)%steps.length),4500);return()=>clearInterval(timer)},[]);
-  return <div className="method-experience"><div className="method-nav" role="tablist" aria-label="مراحل منهج ترتيب">{steps.map(([n,t],i)=><button key={n} role="tab" aria-selected={active===i} onClick={()=>setActive(i)}><span>{n}</span><b>{t}</b></button>)}</div><div className="method-focus" role="tabpanel"><span className="method-number">{steps[active][0]}</span><p>المرحلة الحالية</p><h3>{steps[active][1]}</h3><div className="method-line"><i key={active}/></div><p className="method-copy">{steps[active][2]}</p><button className="method-next" onClick={()=>setActive((active+1)%steps.length)}>المرحلة التالية <ChevronLeft size={17}/></button></div></div>
-}
-
-const faqs = [
-  ["كيف يتم تحديد سعر الخدمة؟", "بحسب حجم المساحة وكمية الأغراض والمدة المتوقعة وحجم الفريق. بعد مراجعة الصور، نرسل لك نطاق سعر واضحًا خلال 24 ساعة."],
-  ["هل أدوات التخزين مشمولة؟", "تُحتسب بصورة مستقلة عند الحاجة، ولا يتم شراء أي منظمات قبل القياس والحصول على موافقتك."],
-  ["هل تشمل الخدمة التنظيف؟", "الخدمة متخصصة في الفرز والتصنيف وتصميم أنظمة التنظيم، وليست خدمة تنظيف منزلي تقليدية."],
-  ["هل يجب أن أكون موجودة؟", "وجودك مهم في قرارات الفرز الأولى، ويمكن للفريق متابعة التنفيذ بعد الاتفاق على القرارات الأساسية."],
-  ["كيف تحافظون على الخصوصية؟", "نتعامل مع ممتلكاتك بسرية واحترام، ولا نصور أو ننشر أي مساحة دون موافقة صريحة."],
-  ["هل يمكن تدريب العاملة المنزلية؟", "نعم، نشرح لها طريقة النظام وإعادة الأغراض إلى أماكنها ليبقى سهلًا بعد التسليم."],
-];
-
-function BeforeAfter({before, after, label, priority=false}:{before:string;after:string;label:string;priority?:boolean}) {
-  const [split, setSplit] = useState(52);
-  const move=(element:HTMLDivElement,clientX:number)=>{const rect=element.getBoundingClientRect();setSplit(Math.max(10,Math.min(90,((clientX-rect.left)/rect.width)*100)))};
-  return <div className="compare" style={{"--split": `${split}%`} as React.CSSProperties}
-    onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);move(e.currentTarget,e.clientX)}}
-    onPointerMove={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))move(e.currentTarget,e.clientX)}}>
-    <img className="after" src={after} alt={`${label} بعد التنظيم`} loading={priority?"eager":"lazy"} fetchPriority={priority?"high":"auto"} decoding="async" width="1280" height="853" />
-    <div className="before"><img src={before} alt={`${label} قبل التنظيم`} loading={priority?"eager":"lazy"} fetchPriority={priority?"low":"auto"} decoding="async" width="1280" height="853" /></div>
-    <span className="tag before-tag">قبل</span><span className="tag after-tag">بعد</span>
-    <input aria-label="حرّكي للمقارنة بين قبل وبعد" type="range" min="10" max="90" value={split} onInput={e=>setSplit(+(e.currentTarget.value))} onChange={e=>setSplit(+e.currentTarget.value)} />
-  </div>;
-}
-
-function ServiceCard({name,description,before,after}:{name:string;description:string;before:string;after:string}){
-  const [showAfter,setShowAfter]=useState(false);
-  return <article className={`service ${showAfter?"is-after":""}`} tabIndex={0} onClick={()=>setShowAfter(!showAfter)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setShowAfter(!showAfter)}}} aria-label={`${name}: اضغطي للتبديل بين قبل وبعد`}><div className="service-media"><img className="service-before" src={before} alt={`${name} قبل التنظيم`} loading="lazy" decoding="async" width="1280" height="853"/><img className="service-after" src={after} alt={`${name} بعد التنظيم`} loading="lazy" decoding="async" width="1280" height="853"/><span className="service-state before-state">قبل</span><span className="service-state after-state">بعد</span><button type="button" className="service-toggle" onClick={e=>{e.stopPropagation();setShowAfter(!showAfter)}}>{showAfter?"شاهدي قبل":"شاهدي بعد"}</button></div><div><h3>{name}</h3><p>{description}</p><a href="#assessment" onClick={e=>e.stopPropagation()}>اطلبي تقييمها ←</a></div></article>
-}
-
-function Assessment() {
-  const [step,setStep]=useState(1); const [done,setDone]=useState(false);
-  const [form,setForm]=useState({name:"",phone:"",area:"",space:"المطبخ",goal:"إنشاء نظام سهل الاستمرار",notes:""});
-  const set=(k:string,v:string)=>setForm({...form,[k]:v});
-  const msg=`مرحبًا، أرغب في طلب تقييم لمساحتي من شركة ترتيب.\nالاسم: ${form.name}\nرقم الجوال: ${form.phone}\nنوع المساحة: ${form.space}\nالحي: ${form.area}\nالهدف: ${form.goal}\nالملاحظات: ${form.notes}\nسأرسل الصور أو الفيديوهات للمساحة عبر المحادثة.`;
-  if(done) return <div className="assessment success"><div className="assessment-content"><span>✓</span><h3>طلبك جاهز للمراجعة</h3><p>راجعي الملخص، ثم افتحي واتساب عندما تكونين مستعدة. لن تُرسل أي بيانات تلقائيًا.</p><dl><dt>الاسم</dt><dd>{form.name||"—"}</dd><dt>المساحة</dt><dd>{form.space}</dd><dt>الهدف</dt><dd>{form.goal}</dd></dl></div><div className="form-actions"><button onClick={()=>setDone(false)}>تعديل المعلومات</button><a className="primary" href={whatsappUrl(msg)} target="_blank" rel="noreferrer" data-event="quote_form_submit">فتح رسالة واتساب</a></div></div>;
-  return <div className="assessment"><div className="progress"><span style={{width:`${step*25}%`}} /></div><div className="assessment-content"><p className="eyebrow">الخطوة {step} من 4</p>
-    {step===1&&<><h3>معلومات التواصل</h3><div className="fields"><label>الاسم<input value={form.name} onChange={e=>set("name",e.target.value)} /></label><label>رقم الجوال<input inputMode="tel" value={form.phone} onChange={e=>set("phone",e.target.value)} /></label><label>الحي<input value={form.area} onChange={e=>set("area",e.target.value)} /></label></div></>}
-    {step===2&&<><h3>معلومات المساحة</h3><div className="fields"><label>نوع المساحة<select value={form.space} onChange={e=>set("space",e.target.value)}><option>المطبخ</option><option>غرفة الملابس</option><option>المستودع</option><option>المنزل بالكامل</option><option>مكتب</option></select></label><label>حالة المكان<select><option>مستخدم حاليًا</option><option>منزل جديد</option><option>قبل الانتقال</option><option>بعد الانتقال</option></select></label></div></>}
-    {step===3&&<><h3>ما الهدف الأهم؟</h3><div className="choice-grid">{["التخلص من الفوضى","استغلال أفضل للمساحة","الاستعداد للانتقال","إنشاء نظام سهل الاستمرار"].map(x=><button className={form.goal===x?"selected":""} onClick={()=>set("goal",x)} key={x}>{x}</button>)}</div></>}
-    {step===4&&<><h3>الصور والملاحظات</h3><label className="upload">إضافة صور أو فيديو<input type="file" multiple accept="image/*,video/*" /></label><label>ملاحظات<textarea value={form.notes} onChange={e=>set("notes",e.target.value)} /></label></>}</div>
-    <div className="form-actions">{step>1&&<button onClick={()=>setStep(step-1)}>السابق</button>}<button className="primary" onClick={()=>step<4?setStep(step+1):setDone(true)}>{step<4?"التالي":"مراجعة الطلب"}</button></div>
-  </div>;
-}
-
-export default function TarteeebSite(){
-  const [menu,setMenu]=useState(false);
-  return <main><h1 className="seo-only">نحوّل الفوضى إلى نظام يناسب أسلوب حياتك</h1>
-    <header><a className="official-logo" href="#top" aria-label="ترتيب Arrange and Organize"><img src="/tarteeb-logo-official.png" alt="شعار ترتيب الرسمي" decoding="async" width="240" height="96"/></a><button className="menu" aria-label="فتح القائمة" onClick={()=>setMenu(!menu)}>☰</button><nav className={menu?"open":""}>{[["قبل وبعد","top"],["خدماتنا","services"],["منهج ترتيب","method"],["المدونة","blog"],["من نحن","about"],["الأسئلة الشائعة","faq"]].map(([l,id])=><a key={id} href={`#${id}`} onClick={()=>setMenu(false)}>{l}</a>)}</nav></header>
-    <section id="top" className="comparison-hero"><BeforeAfter priority label="المطبخ" before="/images/kitchen-before.webp" after="/images/kitchen-organized.webp"/></section>
-    <section className="brand-intro"><p>ترتيب تحوّل مساحاتك المزدحمة إلى أنظمة عملية وجميلة، مصممة لتناسب حياتك وتستمر معك.</p></section>
-    <section className="proof-counts" aria-labelledby="proof-title">
-      <div className="proof-copy">
-        <p className="proof-kicker">أرقام ترتيب</p>
-        <h2 id="proof-title">أثر يُرى في كل مساحة.</h2>
-        <p>كل رقم يمثل مساحة أصبحت أوضح، وروتينًا يوميًا صار أخف.</p>
-      </div>
-      <div className="proof-grid">
-        {stats.map(({Icon,value,label},index)=><article className="proof-stat" key={label} style={{"--stat-delay":`${index * 110}ms`} as React.CSSProperties}>
-          <span className="proof-index" aria-hidden="true">0{index+1}</span>
-          <span className="proof-icon"><Icon aria-hidden="true"/></span>
-          <strong><CountUp value={value}/></strong>
-          <span className="proof-label">{label}</span>
-        </article>)}
-      </div>
-    </section>
-    <section id="services" className="section services-section"><div className="section-head"><div><p className="eyebrow services-title">خدماتنا</p><h2>نرتب المساحة حول حياتك.</h2></div></div><div className="service-grid">{services.map(([n,d,before,after])=><ServiceCard key={n} name={n} description={d} before={before} after={after}/>)}</div></section>
-    <section id="method" className="method section"><div className="section-head"><div><p className="eyebrow">طريقتنا معك</p><h2>من الفوضى إلى الراحة، خطوة بخطوة.</h2></div><p>ست محطات واضحة؛ اختاري أي محطة لتعرفي ماذا يحدث فيها.</p></div><MethodExperience/></section>
-    <section id="work" className="section transformations"><div className="section-head"><div><p className="eyebrow">قصص من بيوت حقيقية</p><h2>قبل وبعد… وحياة صارت أخف.</h2></div><p>اسحبي الخط داخل الصورة واكتشفي كيف غيّر النظام تفاصيل يومهم.</p></div><div className="transform-grid two"><article><h3>غرفة الملابس</h3><BeforeAfter label="غرفة الملابس" before="/images/closet-before.webp" after="/images/closet-organized.webp"/><div className="story-preview"><strong>دلال الجعويني</strong><p>كانت تبدأ صباحها بالبحث بين القطع؛ واليوم ترى كل خياراتها وتعيدها إلى مكانها بسهولة.</p><a href="/blog/closet-reset">للمزيد عن قصة دلال ←</a></div></article><article><h3>المخزن</h3><BeforeAfter label="المخزن" before="/images/storage-before.webp" after="/images/storage-organized.webp"/><div className="story-preview"><strong>مها العتيبي</strong><p>كان المخزون يتكرر ويختفي بين الصناديق؛ الآن تعرف مها الموجود والناقص من نظرة واحدة.</p><a href="/blog/storage-system">للمزيد عن قصة مها ←</a></div></article></div></section>
-    <section id="about" className="section about"><div className="about-motion" aria-hidden="true"><img src="/images/kitchen-organized.webp" alt="" loading="lazy" decoding="async" width="1280" height="853"/><img src="/images/closet-organized.webp" alt="" loading="lazy" decoding="async" width="1280" height="853"/><img src="/images/storage-organized.webp" alt="" loading="lazy" decoding="async" width="1280" height="853"/></div><div className="about-copy"><p className="eyebrow">عن ترتيب</p><h2>نرتب باحترام وخصوصية.</h2><p>فريق سعودي مدرّب يعمل بإشراف واضح، دون أحكام أو تصوير بلا موافقة.</p><div className="commitment"><strong>متابعة بعد التسليم</strong><span>نعود إليك بعد أسبوعين للتأكد من سهولة النظام.</span></div></div></section>
-    <section id="blog" className="section blog-section"><div className="section-head"><div><h2>أفكار عملية لمساحة تستمر.</h2></div><p>قصص حقيقية وإرشادات بسيطة تساعدك على بناء نظام يناسب يومك.</p></div><div className="blog-grid">{blogPosts.map((post)=><article key={post.slug}><a className="blog-image" href={`/blog/${post.slug}`}><img src={post.image} alt={post.title} loading="lazy" decoding="async" width="1280" height="853"/></a><div><span>{post.category} · {post.readTime}</span><h3><a href={`/blog/${post.slug}`}>{post.title}</a></h3><p>{post.excerpt}</p><a className="blog-link" href={`/blog/${post.slug}`}>اقرئي المقال ←</a></div></article>)}</div></section>
-    <section id="faq" className="section faq"><p className="eyebrow">قبل أن تبدئي</p><h2>أسئلة شائعة</h2><div>{faqs.map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><div className="faq-answer"><p>{a}</p></div></details>)}</div></section>
-    <section id="assessment" className="section assess-wrap"><div className="assessment-copy"><p className="eyebrow">طلب تقييم المساحة</p><h2>ابدئي بخطوات بسيطة</h2><p>أخبرينا عن المساحة وهدفك، ثم راجعي الملخص وافتحي رسالة واتساب الجاهزة.</p></div><Assessment /></section>
-    <a className="whatsapp" href={whatsappUrl("مرحبًا، أرغب في تقييم مساحتي والحصول على عرض سعر.")} target="_blank" rel="noreferrer" aria-label="أرسلي صور المساحة عبر واتساب" data-event="whatsapp_click"><span>و</span></a>
-  </main>
+export default function TarteebSite() {
+  const [lang, setLang] = useState<Lang>("ar"); const [menu, setMenu] = useState(false); const t = content[lang];
+  useEffect(() => { document.documentElement.lang=lang; document.documentElement.dir=lang==="ar"?"rtl":"ltr"; }, [lang]);
+  const ids = ["impact", "services", "method", "work", "about", "faq"];
+  return <main className={`site-${lang}`}>
+    <header><a className="official-logo" href="#top"><img src="/tarteeb-logo-official.png" alt="Tarteeb" width="240" height="96"/></a><button className="lang-toggle" onClick={() => setLang(lang==="ar"?"en":"ar")}>{t.langName}</button><button className="menu" aria-label="Menu" onClick={() => setMenu(!menu)}>☰</button><nav className={menu?"open":""}>{t.menu.map((label,i)=><a key={ids[i]} href={`#${ids[i]}`} onClick={()=>setMenu(false)}>{label}</a>)}</nav></header>
+    <section id="top" className="luxury-hero"><div className="luxury-hero-copy"><p className="eyebrow">TARTEEB · ARRANGE &amp; ORGANIZE</p><h1>{t.hero[0]}</h1><p>{t.hero[1]}</p><a className="primary" href="#assessment">{t.cta[2]}</a></div><BeforeAfter before={images[0][0]} after={images[0][1]} label={t.serviceItems[0][0]} beforeText={t.before} afterText={t.after} priority/></section>
+    <section id="impact" className="proof-counts"><div className="proof-copy"><h2>{t.impact[0]}</h2><p>{t.impact[1]}</p></div><div className="proof-grid">{values.map((value,i)=>{const Icon=icons[i];return <article className="proof-stat" key={t.stats[i]}><span className="proof-icon"><Icon/></span><strong><CountUp value={value}/></strong><span>{t.stats[i]}</span></article>})}</div></section>
+    <section id="services" className="section services-section"><div className="section-head"><div><p className="eyebrow">{lang==="ar"?"خدماتنا":"OUR SERVICES"}</p><h2>{t.services[0]}</h2></div><p>{t.services[1]}</p></div><div className="service-grid">{t.serviceItems.map((item,i)=><article className="service" key={item[0]}><div className="service-media"><img src={images[i][1]} alt={item[0]} loading="lazy" width="1280" height="853"/></div><div><h3>{item[0]}</h3><p>{item[1]}</p></div></article>)}</div></section>
+    <section id="method" className="method section"><div className="section-head"><div><p className="eyebrow">{lang==="ar"?"منهج ترتيب":"THE TARTEEB METHOD"}</p><h2>{t.method[0]}</h2></div><p>{t.method[1]}</p></div><div className="method-grid">{t.steps.map((step,i)=><article key={step[0]}><span>{String(i+1).padStart(2,"0")}</span><h3>{step[0]}</h3><p>{step[1]}</p></article>)}</div></section>
+    <section id="work" className="section transformations"><div className="section-head"><div><h2>{t.stories[0]}</h2></div><p>{t.stories[1]}</p></div><div className="transform-grid two">{t.storyItems.map((story,i)=><article key={story[0]}><BeforeAfter before={images[i+1][0]} after={images[i+1][1]} label={story[0]} beforeText={t.before} afterText={t.after}/><h3>{story[0]}</h3><p>{story[1]}</p></article>)}</div></section>
+    <section id="about" className="section about"><div className="about-motion"><img src="/images/kitchen-organized.webp" alt=""/><img src="/images/closet-organized.webp" alt=""/><img src="/images/storage-organized.webp" alt=""/></div><div className="about-copy"><h2>{t.about[0]}</h2><p>{t.about[1]}</p><div className="commitment"><strong>{t.about[2]}</strong><span>{t.about[3]}</span></div></div></section>
+    <section id="blog" className="section blog-section"><div className="section-head"><div><h2>{t.blog[0]}</h2></div><p>{t.blog[1]}</p></div><div className="luxury-blog-grid">{t.blogItems.map((title,i)=><article key={title}><span>0{i+1}</span><h3>{title}</h3></article>)}</div></section>
+    <section id="faq" className="section faq"><h2>{t.faqTitle}</h2><div>{t.faqs.map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><div className="faq-answer"><p>{a}</p></div></details>)}</div></section>
+    <section id="assessment" className="section final-cta"><div><h2>{t.cta[0]}</h2><p>{t.cta[1]}</p></div><a href={whatsappUrl(lang==="ar"?"مرحبًا، أرغب في حجز استشارة مجانية مع ترتيب.":"Hello, I would like to book a complimentary consultation with Tarteeb.")} target="_blank" rel="noreferrer">{t.cta[2]}</a></section>
+    <footer className="luxury-footer"><div><img src="/tarteeb-logo-official.png" alt="Tarteeb" width="240" height="96"/><p>{t.footer[0]}</p></div><p>{t.footer[1]}</p><p>© 2026 Tarteeb</p></footer>
+  </main>;
 }

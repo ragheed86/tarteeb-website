@@ -33,7 +33,7 @@ test("home page exposes local business and FAQ structured data", async () => {
   assert.match(html, /ProfessionalService/);
   assert.match(html, /LocalBusiness/);
   assert.match(html, /FAQPage/);
-  assert.match(html, /نحوّل الفوضى إلى نظام يناسب أسلوب حياتك/);
+  assert.match(html, /نظام يليق بحياتك، لا فوضى تُثقلها/);
 });
 
 test("service page exposes Service, FAQ and breadcrumb data", async () => {
