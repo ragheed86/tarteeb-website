@@ -1,11 +1,11 @@
 (() => {
   const serviceRoutes = [
-    "/kitchen-organizing",
-    "/wardrobe-organizing",
-    "/storage-room-organizing",
-    "/kids-room-organizing",
-    "/office-organizing",
-    "/moving-organizing",
+    "/kitchen-organizing/",
+    "/wardrobe-organizing/",
+    "/storage-room-organizing/",
+    "/kids-room-organizing/",
+    "/office-organizing/",
+    "/moving-organizing/",
   ];
 
   const serviceTitles = [
@@ -14,7 +14,7 @@
     "ترتيب وتنظيم المستودعات",
     "ترتيب وتنظيم غرف الأطفال",
     "ترتيب وتنظيم المكاتب",
-    "ترتيب وتنظيم مابعد الإنتقال",
+    "ترتيب وتنظيم المنزل بعد الانتقال",
   ];
 
   const applyRefinements = () => {
@@ -26,7 +26,7 @@
       }
       if (link && serviceRoutes[index]) {
         link.href = serviceRoutes[index];
-        link.textContent = "تفاصيل الخدمة ←";
+        link.textContent = `${serviceTitles[index]} — التفاصيل ←`;
       }
     });
 
