@@ -30,6 +30,12 @@
       }
     });
 
+
+    const proofValues = [139, 230, 193, 700];
+    document.querySelectorAll(".proof-stat strong").forEach((value, index) => {
+      if (proofValues[index] !== undefined) value.textContent = String(proofValues[index]);
+    });
+
     const methodLabel = document.querySelector("#method .section-head .eyebrow");
     if (methodLabel) methodLabel.textContent = "منهج ترتيب";
 
